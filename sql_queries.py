@@ -64,7 +64,10 @@ songplay_table_insert = ("""INSERT INTO songplays(start_time, user_id,level, son
 user_table_insert = ("""INSERT INTO users(user_id, first_name, last_name, gender, level)\
                     VALUES (%s, %s, %s, %s, %s) \
                     ON CONFLICT (user_id) \
-                    DO NOTHING;
+                    DO UPDATE SET \
+                    level = EXCLUDED.level,\
+                    last_name = EXCLUDED.level,\
+                    gender = EXCLUDED.gender;
 """)
 
 song_table_insert = ("""INSERT INTO songs(song_id, title, artist_id, year, duration)\
@@ -76,7 +79,11 @@ song_table_insert = ("""INSERT INTO songs(song_id, title, artist_id, year, durat
 artist_table_insert = ("""INSERT INTO artists(artist_id, name, location, latitude, longitude)\
                         VALUES (%s, %s, %s, %s, %s) \
                         ON CONFLICT (artist_id) \
-                        DO NOTHING ;
+                        DO UPDATE SET \
+                        name = EXCLUDED.name,\
+                        location = EXCLUDED.location, \
+                        latitude = EXCLUDED.latitude,\
+                        longitute = EXCLUDED.latitue;
 """)
 
 
