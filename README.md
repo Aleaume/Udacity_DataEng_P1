@@ -255,3 +255,19 @@ And then we finally can order all the data and insert into the songplays table:
 
 
 ## Improvement suggestions / Additional work
+
+Due to the difficulty to find a matching song in the etl notebook during development of the songplays insert logic, once the etl.py ran I did use a quality control SQL query in the test notebook to retrieve any match and see if the logic was correctly implemented:
+
+```SQL
+
+SELECT * FROM songplays WHERE artist_id != 'None' AND song_id != 'None' LIMIT 50;
+
+```
+
+![image](https://user-images.githubusercontent.com/32632731/141275987-1073322d-4668-4093-a555-aa2c190e0aea.png)
+
+### Imrpovement ideas:
+
+There are many ways to improve this work. One of the point that could help guarantee integrity of the pipeline would be add additional Quality checks after each insert, with comparing the number of records in the files with the records created in the DB for example.
+
+
