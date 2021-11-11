@@ -3,7 +3,10 @@ Udacity Data Engineer course:  Project 1, Data Modeling with Postgres.
 https://www.udacity.com/course/data-engineer-nanodegree--nd027 
 
 ## Requirements
-install psycopg2
+
+- install psycopg2
+
+- Have the scripts all in the same folder, along with both logs folders in a folder "data".
 
 ## Overview
 
@@ -59,13 +62,108 @@ The file structure itself is similar to this:
 
 
 
-
-
-
 ## Tables Creation & DB queries
+
+The sparkify DB and tables is created as showed in this diagramm, following Star Schema, were the songplays table is the fact table and the other 4 (users, songs, artists, time) are the dimension tables:
 
 ![image](https://user-images.githubusercontent.com/32632731/141192328-6a415d71-9bb5-4c78-95c7-ee628d0c8041.png)
 
 ## ETL (Extract Tranform Load)
+
+### Song Data & Artist Data
+After fetching each file we pick up the data in a Dataframe and then select only the values to insert (song ID, title, artist ID, year, and duration)
+Once done we insert using the prepared query.
+Same goes for the the artist data with  ID, name, location, latitude, and longitude.
+
+```python
+
+def process_song_file(cur, filepath):
+    # open song file
+    df = pd.read_json(filepath,typ='series')
+
+    # insert song record
+    song_data = [df.values[6],df.values[7] ,df.values[1], df.values[9],df.values[8]]
+    cur.execute(song_table_insert, song_data)
+    
+    # insert artist record
+    artist_data = [df.values[1],df.values[5],df.values[4],df.values[2],df.values[3]]
+    cur.execute(artist_table_insert, artist_data)
+
+
+```
+
+
+
+### Time & Users Data
+
+We first fetch all the files in the logs_data folder and for each entry / file we push it to a DataFrame, filter the records with page = "NextSong", use the timestamp to retrieve other data formats and finally insert it into the time table once the data has the relevant parameters ("timestamp", "hour", "day","week", "month", "year", "weekday")
+For the Users data, out of the first Dataset after filter, we pick user ID, first name, last name, gender and level and insert into users table.
+
+```python
+
+def process_log_file(cur, filepath):
+    # open log file
+    df = pd.read_json(filepath, lines=True)
+
+    # filter by NextSong action
+    df = df[df.page == "NextSong"]
+
+    # convert timestamp column to datetime
+    t = pd.to_datetime(df['ts'],unit="ms")
+    
+    # insert time data records
+    time_data = [df['ts'],t.dt.hour,t.dt.day,t.dt.week,t.dt.month,t.dt.year,t.dt.weekday]
+    column_labels = ["timestamp", "hour", "day","week", "month", "year", "weekday"]
+    time_dict = dict(zip(column_labels,time_data))
+    time_df = pd.DataFrame.from_dict(time_dict)
+
+
+    for i, row in time_df.iterrows():
+        cur.execute(time_table_insert, list(row))
+
+    # load user table
+    user_df = df[["userId","firstName","lastName","gender","level"]]
+
+    # insert user records
+    for i, row in user_df.iterrows():
+        cur.execute(user_table_insert, row)
+
+```
+### Songplays data
+
+In here we need not only the logs_data as source but also previously inserted data from songs & artists table.
+We retrieve from the logs_data previously created DataFrame the values timestamp, user ID, level, session ID, location, and user agent.
+From the same Dataframe we use the song name, artist and length to query the DB for a match using a JOIN as follow:
+```SQL
+
+SELECT song_id , artists.artist_id \
+                FROM (songs JOIN artists ON songs.artist_id = artists.artist_id) \
+                WHERE songs.title = (%s) AND  artists.name= (%s) AND songs.duration = (%s)
+
+```
+
+And then we finally can order all the data and insert into the songplays table:
+
+```python
+# insert songplay records
+    for index, row in df.iterrows():
+        
+        # get songid and artistid from song and artist tables
+        cur.execute(song_select, (row.song, row.artist, row.length))
+        results = cur.fetchone()
+        
+        if results:
+            songid, artistid = results
+        else:
+            songid, artistid = None, None
+
+        # insert songplay record
+        songplay_data = (row.ts,row.userId,row.level,songid,artistid,row.sessionId,row.location,row.userAgent)
+        cur.execute(songplay_table_insert, songplay_data)
+
+```
+
+
+
 
 ## Improvement suggestions / Additional work
