@@ -37,9 +37,30 @@ etl.py is in a way the final result, picking up most of what has been developped
 
 ### Dataset
 
+Composed of 2 parts, songs & logs.
+
 #### Song Data
+- The song dataset is coming from the Million Song Dataset (https://labrosa.ee.columbia.edu/millionsong/). Each file contains metadat about 1 song and is in json format.
+Folder structure goes as follow: song_data/[A-Z]/[A-Z]/[A-Z]/name.json
+Here is an example of the file structure:
+
+```json
+
+{"num_songs": 1, "artist_id": "ARJIE2Y1187B994AB7", "artist_latitude": null, "artist_longitude": null, "artist_location": "", "artist_name": "Line Renaud", "song_id": "SOUPIRU12A6D4FA1E1", "title": "Der Kleine Dompfaff", "duration": 152.92036, "year": 0}
+
+```
 
 #### Log Data
+- The second dataset is generated from an event simulator (https://github.com/Interana/eventsim) based on songs in the previous dataset. Also in json it containes the logs of activity of the music streaming app.
+Folder structure goes as follow : log_data/[year]/[month]/[year]-[month]-[day]-events.json
+The file structure itself is similar to this:
+
+![image](https://user-images.githubusercontent.com/32632731/141263859-72aa801e-bad3-4a23-86e4-7898c3cca585.png)
+
+
+
+
+
 
 ## Tables Creation & DB queries
 
