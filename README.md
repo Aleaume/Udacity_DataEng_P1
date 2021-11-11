@@ -68,6 +68,94 @@ The sparkify DB and tables is created as showed in this diagramm, following Star
 
 ![image](https://user-images.githubusercontent.com/32632731/141192328-6a415d71-9bb5-4c78-95c7-ee628d0c8041.png)
 
+### songplay table
+
+```SQL
+
+CREATE TABLE IF NOT EXISTS songplays(\
+                        songplay_id SERIAL PRIMARY KEY, \
+                        start_time bigint, \
+                        user_id int,\
+                        level varchar,\
+                        song_id varchar,\
+                        artist_id varchar,\
+                        session_id int,\
+                        location varchar,\
+                        user_agent varchar);
+      
+      
+INSERT INTO songplays(start_time, user_id,level, song_id, artist_id, session_id, location, user_agent)\
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
+
+
+
+```
+### users table
+
+```SQL
+
+CREATE TABLE IF NOT EXISTS users(\
+                    user_id int PRIMARY KEY,\
+                    first_name varchar,\
+                    last_name varchar,\
+                    gender varchar,\
+                    level varchar);
+
+INSERT INTO users(user_id, first_name, last_name, gender, level)\
+                    VALUES (%s, %s, %s, %s, %s) ON CONFLICT (user_id) DO NOTHING;
+
+```
+
+### songs table
+
+```SQL
+
+CREATE TABLE IF NOT EXISTS songs(\
+                    song_id varchar PRIMARY KEY,\
+                    title varchar,\
+                    artist_id varchar,\
+                    year int,\
+                    duration float);
+
+
+INSERT INTO songs(song_id, title, artist_id, year, duration)\
+                    VALUES (%s, %s, %s, %s, %s) ON CONFLICT (song_id) DO NOTHING;
+
+```
+
+### artists table
+
+```SQL
+
+CREATE TABLE IF NOT EXISTS artists(\
+                        artist_id varchar PRIMARY KEY,\
+                        name varchar,\
+                        location varchar,\
+                        latitude float,\
+                        longitude float);
+
+INSERT INTO artists(artist_id, name, location, latitude, longitude)\
+                        VALUES (%s, %s, %s, %s, %s) ON CONFLICT (artist_id) DO NOTHING ;
+
+```
+
+### time table
+
+```SQL
+CREATE TABLE IF NOT EXISTS time (\
+                    start_time bigint PRIMARY KEY,\
+                    hour int,\
+                    day int,\
+                    week int,\
+                    month int,\
+                    year int,\
+                    weekday varchar);
+
+INSERT INTO time(start_time, hour, day, week, month, year, weekday)\
+                    VALUES (%s, %s, %s, %s, %s, %s, %s) ON CONFLICT (start_time) DO NOTHING;
+
+```
+
 ## ETL (Extract Tranform Load)
 
 ### Song Data & Artist Data
